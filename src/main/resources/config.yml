@@ -5,3 +5,29 @@ database:
   username: username
   password: password
   database: echregions
+
+region:
+  sectorSize: 10 # This number will be the number of blocks per region sector, bigger means less sectors but more data processing, lower means more sectors but fewer data processing
+
+#-----------------------------------------------
+# Messages colors:
+#  - This plugin does not support old color code (&), please use tags like <red>, <green> etc.
+#  - For more info about colors check https://docs.advntr.dev/minimessage/format.html#color
+#-----------------------------------------------
+messages:
+  prefix: '<gray>[<blue><b>ECHRegions</b></blue>]</gray> '
+  commands-help:
+    - '<white>/region</white> <gray>-</gray> <red>Opens the regions menu</red>'
+    - '<white>/region create <name></white> <gray>-</gray> <red>Creates a region at the selected location</red>'
+    - '<white>/region wand</white> <gray>-</gray> <red>Gives the user a stick with a custom name to select locations to create a region</red>'
+    - '<white>/region add <name> <username></white> <gray>-</gray> <red>Whitelist a user to a region</red>'
+    - '<white>/region remove <name> <username></white> <gray>-</gray> <red>Removes a user from the region whitelist</red>'
+    - '<white>/region whitelist <name></white> <gray>-</gray> <red>Lists the users in the region whitelist</red>'
+    - '<white>/region <name></white> <gray>-</gray> <red>Opens the region menu</red>'
+  wand-given: '<white>The wand has been given to you!</white>'
+  region-not-found: '<red>The region <red><b>{region}</b></red> does not exist!</red>'
+  region-already-exists: '<red>The region <gray><b>{region}</b></gray> already exists!</red>'
+  position-not-set: '<red>The position <gray><b>{position}</b></gray> has not been set!</red>'
+  positions-need-to-be-same-world: '<red>The positions need to be in the same world!</red>'
+  position-set-correctly: '<green>The position <gray><b>{position}</b></gray> has been set correctly!</green>'
+  region-created: '<green>The region <gray><b>{region}</b></gray> has been created!</green>'

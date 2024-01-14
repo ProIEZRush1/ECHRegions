@@ -2,3 +2,10 @@ name: ECHRegions
 main: com.proiezrush.echregions.ECHRegions
 version: 1.0B
 author: ProIEZRush
+api-version: '1.13'
+commands:
+  region:
+    description: Main command
+    aliases:
+      - echregion
+      - echregions

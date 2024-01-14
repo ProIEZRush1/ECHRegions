@@ -42,6 +42,10 @@ java {
 
 tasks {
     shadowJar {
+        // Your existing configuration
         relocate("kotlin", "com.proiezrush.echregions.kotlin")
+
+        // Setting the destination directory
+        destinationDirectory.set(file("/Users/ech/Documents/Test plugins server/plugins"))
     }
 }

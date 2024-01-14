@@ -1,4 +1,3 @@
 package com.proiezrush.echregions.objects
 
-class WPlayer(public val uuid: String) {
-}
+data class WPlayer(public val uuid: String)
