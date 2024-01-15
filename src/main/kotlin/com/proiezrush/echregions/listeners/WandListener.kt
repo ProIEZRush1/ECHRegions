@@ -94,6 +94,9 @@ class WandListener(private val plugin: ECHRegions) : Listener {
         }
         runner.runTaskAsynchronously(plugin)
 
+        // Clear old positions
+        localDatabaseManager.clearPlayerPositions(uuid)
+
         // Send message
         val regionRedefinedMessage = config.getRegionRedefined(name)
         MessageUtils.sendPlayerMessage(player, regionRedefinedMessage)

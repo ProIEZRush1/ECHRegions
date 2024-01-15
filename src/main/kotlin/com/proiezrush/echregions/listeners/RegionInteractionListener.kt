@@ -7,9 +7,20 @@ import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
 import com.proiezrush.echregions.utils.MessageUtils
+import com.proiezrush.echregions.utils.RegionUtils
 import net.kyori.adventure.text.BlockNBTComponent.Pos
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.Cancellable
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
 class RegionInteractionListener(private val plugin: ECHRegions) : Listener {
@@ -20,21 +31,81 @@ class RegionInteractionListener(private val plugin: ECHRegions) : Listener {
     @EventHandler
     fun onRegionInteraction(event: PlayerInteractEvent) {
         val player = event.player
-        val uuid = player.uniqueId.toString()
 
         val action = event.action
-        if (action.toString().uppercase().contains("AIR")) {
+        val clickedBlock = event.clickedBlock
+        if (action == Action.RIGHT_CLICK_BLOCK && clickedBlock != null) {
+            when (clickedBlock.type) {
+                Material.CHEST, Material.TRAPPED_CHEST,
+                Material.ENDER_CHEST, Material.SHULKER_BOX,
+                Material.FURNACE, Material.FURNACE_MINECART,
+                Material.BLAST_FURNACE -> {
+                    handleRegionInteraction(clickedBlock.location, player, event)
+                }
+                else -> {}
+            }
+        }
+    }
+
+    @EventHandler
+    fun onBlockPlace(event: BlockPlaceEvent) {
+        val player = event.player
+
+        val location = event.block.location
+        handleRegionInteraction(location, player, event)
+    }
+
+    @EventHandler
+    fun onBlockBreak(event: BlockBreakEvent) {
+        val player = event.player
+
+        val location = event.block.location
+        handleRegionInteraction(location, player, event)
+    }
+
+    @EventHandler
+    fun onPlayerDamage(event: EntityDamageEvent) {
+        val entity = event.entity
+        if (entity !is Player) {
             return
         }
+
+        val location = entity.location
+        //handleRegionInteraction(location, entity, event) // Not protecting now
+    }
+
+    @EventHandler
+    fun onEntityDamagedByPlayer(event: EntityDamageByEntityEvent) {
+        val damager = event.damager
+        if (damager !is Player) {
+            return
+        }
+
+        val location = damager.location
+        //handleRegionInteraction(location, damager, event) // Not protecting now
+    }
+
+    @EventHandler
+    fun onPlayerDamagedByEntity(event: EntityDamageByEntityEvent) {
+        val entity = event.entity
+        if (entity !is Player) {
+            return
+        }
+
+        val location = entity.location
+        //handleRegionInteraction(location, entity, event) // Not protecting now
+    }
+
+    private fun handleRegionInteraction(location: Location, player: Player, event: Cancellable) {
+        val uuid = player.uniqueId.toString()
 
         // Get player region
         val spatialRegions = localDatabaseManager.spatialRegions
 
-        val playerLocation = player.location
-        val position = Position(player.world.name, playerLocation.x, playerLocation.y, playerLocation.z)
 
-        val playerRegion = findPlayerRegion(spatialRegions, config.getSectorSize(), position)
-        MessageUtils.sendPlayerMessage(player, playerRegion.toString())
+        val position = Position(player.world.name, location.x, location.y, location.z)
+
+        val playerRegion = RegionUtils.findPlayerRegion(spatialRegions, config.getSectorSize(), position)
         if (playerRegion != null) {
             val whitelistedPlayers = playerRegion.whitelistedPlayers
 
@@ -47,30 +118,5 @@ class RegionInteractionListener(private val plugin: ECHRegions) : Listener {
         }
     }
 
-    private fun findPlayerRegion(regionsBySpatialKey: Map<SpatialKey, MutableList<Region?>>, sectorSize: Int, playerPosition: Position): Region? {
-        val playerKey = SpatialKey(
-            (playerPosition.x / sectorSize).toInt(),
-            (playerPosition.y / sectorSize).toInt(),
-            (playerPosition.z / sectorSize).toInt()
-        )
 
-        regionsBySpatialKey[playerKey]?.forEach { region ->
-            if (isPositionInsideRegion(playerPosition, region!!)) {
-                return region
-            }
-        }
-
-        return null
-    }
-
-    private fun isPositionInsideRegion(position: Position, region: Region): Boolean {
-        // Check world names, p1 and p2 will always be in the same world
-        if (position.world != region.position1.world) {
-            return false
-        }
-
-        return position.x in minOf(region.position1.x, region.position2.x)..maxOf(region.position1.x, region.position2.x) &&
-                position.y in minOf(region.position1.y, region.position2.y)..maxOf(region.position1.y, region.position2.y) &&
-                position.z in minOf(region.position1.z, region.position2.z)..maxOf(region.position1.z, region.position2.z)
-    }
 }

@@ -25,6 +25,15 @@ class RenameRegionListener(private val plugin: ECHRegions) : Listener {
         if (renamingRegionName != null) {
             val newName = MessageUtils.componentToString(event.message())
 
+            val regionExists = localDatabaseManager.searchRegionByName(uuid, newName)
+            if (regionExists != null) {
+                val regionAlreadyExistsMessage = config.getRegionAlreadyExists(newName)
+                MessageUtils.sendPlayerMessage(player, regionAlreadyExistsMessage)
+
+                event.isCancelled = true
+                return
+            }
+
             // Not renaming anymore
             localDatabaseManager.removePlayerRenamingRegion(uuid)
 

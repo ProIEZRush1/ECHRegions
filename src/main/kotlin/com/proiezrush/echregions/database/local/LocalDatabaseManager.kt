@@ -29,10 +29,20 @@ class LocalDatabaseManager {
         return regionsByUUID[uuid]?.firstOrNull { it?.name == name }
     }
 
-    var spatialRegions = mutableMapOf<SpatialKey, MutableList<Region?>>()
-
     fun getPlayerRegions(uuid: String): List<Region?> {
         return regionsByUUID[uuid] ?: emptyList()
+    }
+
+    var spatialRegions = mutableMapOf<SpatialKey, MutableList<Region?>>()
+
+    fun addRegionToSpatialMap(newRegion: Region, keys: Set<SpatialKey>) {
+        keys.forEach { key ->
+            // Get the list of regions for this key, or create a new list if the key doesn't exist
+            val regionsList = spatialRegions.getOrPut(key) { mutableListOf() }
+
+            // Add the new region to the list
+            regionsList.add(newRegion)
+        }
     }
 
     private var playerSelectedPositions = mutableMapOf<String, MutableList<Position>>()

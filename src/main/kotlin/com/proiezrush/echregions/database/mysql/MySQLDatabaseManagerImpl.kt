@@ -4,6 +4,7 @@ import com.proiezrush.echregions.database.DatabaseManager
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
+import com.proiezrush.echregions.utils.MessageUtils
 import java.sql.Connection
 import java.sql.Statement
 
@@ -14,8 +15,6 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
         val regionsByUUID = mutableMapOf<String, MutableList<Region?>>()
 
         this.connection.let { conn ->
-            val whitelistedPlayers = mutableListOf<String>()
-
             // Get region
             val regionsQuery = "SELECT * FROM ech_regions"
             val regionsData = conn.prepareStatement(regionsQuery).use { regionStmt ->
@@ -24,10 +23,11 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
                     while (regionSet.next()) {
                         val regionId = regionSet.getInt("id")
                         val regionName = regionSet.getString("name")
+                        val ownerUUID = regionSet.getString("ownerUUID")
 
                         val regionData = mutableMapOf<String, Any>()
                         regionData["id"] = regionId
-                        regionData["ownerUUID"] = regionSet.getString("ownerUUID")
+                        regionData["ownerUUID"] = ownerUUID
                         regionData["name"] = regionName
                         regionsData[regionId] = regionData
                     }
@@ -42,6 +42,8 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
                 // Get positions
                 val position1 = getPositionByType(conn, regionId, 1)
                 val position2 = getPositionByType(conn, regionId, 2)
+
+                val whitelistedPlayers = mutableListOf<String>()
 
                 // Get whitelisted players
                 val whitelistedPlayersQuery = "SELECT * FROM ech_whitelisted_players WHERE regionId = ?"
@@ -151,11 +153,7 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
         }
 
         val keys = determineSpatialKeysForRegion(region, sectorSize)
-        keys.forEach { _ ->
-            return keys
-        }
-
-        return emptySet()
+        return keys
     }
 
     override fun deleteRegion(uuid: String, name: String) {

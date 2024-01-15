@@ -120,10 +120,8 @@ class RegionCommand(private val plugin: ECHRegions) : CommandExecutor {
                     // Add region to database async
                     val runnable = object : BukkitRunnable() {
                         override fun run() {
-                            val spatialKey: Set<SpatialKey> = databaseManager.createRegion(uuid, second, p1, p2, config.getSectorSize())
-                            for (key in spatialKey) {
-                                localDatabaseManager.spatialRegions[key] = mutableListOf(region)
-                            }
+                            val spatialKeys: Set<SpatialKey> = databaseManager.createRegion(uuid, second, p1, p2, config.getSectorSize())
+                            localDatabaseManager.addRegionToSpatialMap(region, spatialKeys)
                         }
                     }
                     runnable.runTaskAsynchronously(plugin)

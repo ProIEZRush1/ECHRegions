@@ -13,7 +13,7 @@ import xyz.xenondevs.invui.gui.ScrollGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.window.Window
 
-class RegionsGUI(private val plugin: ECHRegions, private val uuid: String) {
+class RegionsGUI(private val plugin: ECHRegions, uuid: String) {
 
     private val regionList: List<Region?>
     private val gui: Gui
@@ -21,6 +21,7 @@ class RegionsGUI(private val plugin: ECHRegions, private val uuid: String) {
     init {
         val localDatabaseManager = plugin.getDatabaseImpl().getLocalDatabaseManager()
         regionList = localDatabaseManager.getPlayerRegions(uuid)
+        MessageUtils.sendConsoleMessage(regionList.toString())
 
         val items = regionList.map { region ->
             RegionItem(plugin, region!!)
