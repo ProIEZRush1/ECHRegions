@@ -23,7 +23,7 @@ class RegionsGUI(private val plugin: ECHRegions, private val uuid: String) {
         regionList = localDatabaseManager.getPlayerRegions(uuid)
 
         val items = regionList.map { region ->
-            RegionItem(region!!)
+            RegionItem(plugin, region!!)
         }
 
         gui = ScrollGui.items()

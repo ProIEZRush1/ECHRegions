@@ -1,3 +1,3 @@
 package com.proiezrush.echregions.objects
 
-data class Region(public val ownerUUID: String, public val name: String, public val position1: Position, public val position2: Position, public val whitelistedPlayers: MutableMap<String, WPlayer>)
+data class Region(public val ownerUUID: String, public var name: String, public var position1: Position, public var position2: Position, public val whitelistedPlayers: MutableList<String>)

@@ -7,23 +7,25 @@ database:
   database: echregions
 
 region:
-  sectorSize: 10 # This number will be the number of blocks per region sector, bigger means less sectors but more data processing, lower means more sectors but fewer data processing
+  sectorSize: 16 # This number will be the number of blocks per region sector, bigger means less sectors but more data processing, lower means more sectors but fewer data processing
 
 #-----------------------------------------------
 # Messages colors:
 #  - This plugin does not support old color code (&), please use tags like <red>, <green> etc.
 #  - For more info about colors check https://docs.advntr.dev/minimessage/format.html#color
+#  - NOTE: All messages will only work with color tags, commands-help message will also work with hover and insert tags
 #-----------------------------------------------
 messages:
   prefix: '<gray>[<blue><b>ECHRegions</b></blue>]</gray> '
   commands-help:
-    - '<white>/region</white> <gray>-</gray> <red>Opens the regions menu</red>'
-    - '<white>/region create <name></white> <gray>-</gray> <red>Creates a region at the selected location</red>'
-    - '<white>/region wand</white> <gray>-</gray> <red>Gives the user a stick with a custom name to select locations to create a region</red>'
-    - '<white>/region add <name> <username></white> <gray>-</gray> <red>Whitelist a user to a region</red>'
-    - '<white>/region remove <name> <username></white> <gray>-</gray> <red>Removes a user from the region whitelist</red>'
-    - '<white>/region whitelist <name></white> <gray>-</gray> <red>Lists the users in the region whitelist</red>'
-    - '<white>/region <name></white> <gray>-</gray> <red>Opens the region menu</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region>/region</insert></hover></white> <gray>-</gray> <red>Opens the regions menu</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region create>/region create <name></insert></hover></white> <gray>-</gray> <red>Creates a region at the selected location</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region delete>/region delete <name></insert></hover></white> <gray>-</gray> <red>Deletes a region</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region wand>/region wand</insert></hover></white> <gray>-</gray> <red>Gives the user a stick with a custom name to select locations to create a region</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region add>/region add <name> <username></insert></hover></white> <gray>-</gray> <red>Whitelist a user to a region</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region remove>/region remove <name> <username></insert></hover></white> <gray>-</gray> <red>Removes a user from the region whitelist</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region whitelist>/region whitelist <name></insert></hover></white> <gray>-</gray> <red>Lists the users in the region whitelist</red>'
+    - '<white><hover:show_text:"<gray>Shift click to fill command</gray>"><insert:/region>/region <name></insert></hover></white> <gray>-</gray> <red>Opens the region menu</red>'
   wand-given: '<white>The wand has been given to you!</white>'
   region-not-found: '<red>The region <red><b>{region}</b></red> does not exist!</red>'
   region-already-exists: '<red>The region <gray><b>{region}</b></gray> already exists!</red>'
@@ -31,3 +33,17 @@ messages:
   positions-need-to-be-same-world: '<red>The positions need to be in the same world!</red>'
   position-set-correctly: '<green>The position <gray><b>{position}</b></gray> has been set correctly!</green>'
   region-created: '<green>The region <gray><b>{region}</b></gray> has been created!</green>'
+  region-deleted: '<green>The region <gray><b>{region}</b></gray> has been deleted!</green>'
+  no-whitelisted-players: '<red>No whitelisted players!</red>'
+  whitelisted-players-list-title: '<gray>Users:</gray> <yellow><b>{count}</b></yellow>'
+  whitelisted-players-list-player: '<gray>-</gray> <yellow><b>{player}</b></yellow>'
+  player-not-found: '<red>The player <gray><b>{player}</b></gray> does not exist!</red>'
+  player-already-whitelisted: '<red>The player <gray><b>{player}</b></gray> is already whitelisted!</red>'
+  player-whitelisted: '<green>The player <gray><b>{player}</b></gray> has been whitelisted!</green>'
+  player-not-whitelisted: '<red>The player <gray><b>{player}</b></gray> is not whitelisted!</red>'
+  player-removed-from-whitelist: '<green>The player <gray><b>{player}</b></gray> has been removed from the whitelist!</green>'
+  renaming-region: '<gray>Enter a new name for the region</gray>'
+  region-renamed: '<green>The region <gray><b>{oldName}</b></gray> has been renamed to <gray><b>{newName}</b></gray>!</green>'
+  redefining-region: '<gray>Use the wand to redefine the region, use <red>/region wand</red> to get the wand</gray>'
+  region-redefined: '<green>The region <gray><b>{region}</b></gray> positions have been redefined!</green>'
+  region-not-allowed: '<red>You are not allowed to do this!</red>'

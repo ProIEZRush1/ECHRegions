@@ -4,19 +4,17 @@ import com.proiezrush.echregions.database.DatabaseManager
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
-import com.proiezrush.echregions.objects.WPlayer
-import com.proiezrush.echregions.utils.MessageUtils
 import java.sql.Connection
 import java.sql.Statement
 
 class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseManager {
 
-    override fun loadRegions(sectorSize: Int): Pair<Map<SpatialKey, MutableList<Region?>>, Map<String, MutableList<Region?>>> {
+    override fun loadRegions(sectorSize: Int): Pair<MutableMap<SpatialKey, MutableList<Region?>>, Map<String, MutableList<Region?>>> {
         val regionsBySpatialKey = mutableMapOf<SpatialKey, MutableList<Region?>>()
         val regionsByUUID = mutableMapOf<String, MutableList<Region?>>()
 
         this.connection.let { conn ->
-            val whitelistedPlayers = mutableMapOf<String, WPlayer>()
+            val whitelistedPlayers = mutableListOf<String>()
 
             // Get region
             val regionsQuery = "SELECT * FROM ech_regions"
@@ -52,7 +50,7 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
                     val whitelistedPlayersSet = whitelistedPlayersStmt.executeQuery()
                     while (whitelistedPlayersSet.next()) {
                         val uuid = whitelistedPlayersSet.getString("uuid")
-                        whitelistedPlayers[uuid] = WPlayer(uuid)
+                        whitelistedPlayers.add(uuid)
                     }
                 }
 
@@ -113,12 +111,8 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
         return keys
     }
 
-    override fun saveRegions(regions: Map<SpatialKey, MutableList<Region?>>) {
-
-    }
-
-    override fun createRegion(ownerUUID: String, name: String, position1: Position, position2: Position): Region {
-        val region = Region(ownerUUID, name, position1, position2, mutableMapOf())
+    override fun createRegion(ownerUUID: String, name: String, position1: Position, position2: Position, sectorSize: Int): Set<SpatialKey> {
+        val region = Region(ownerUUID, name, position1, position2, mutableListOf())
 
         this.connection.let { conn ->
             val insertRegionSql = "INSERT INTO ech_regions (ownerUUID, name) VALUES (?, ?)"
@@ -156,18 +150,118 @@ class MySQLDatabaseManagerImpl(private val connection: Connection) : DatabaseMan
             }
         }
 
-        return region
+        val keys = determineSpatialKeysForRegion(region, sectorSize)
+        keys.forEach { _ ->
+            return keys
+        }
+
+        return emptySet()
     }
 
-    override fun deleteRegion(regionId: Int) {
+    override fun deleteRegion(uuid: String, name: String) {
+        val regionId = getRegionID(uuid, name)
 
+        this.connection.let { conn ->
+            val deleteRegionSql = "DELETE FROM ech_regions WHERE id = ?"
+
+            conn.prepareStatement(deleteRegionSql).use { deleteRegionStmt ->
+                deleteRegionStmt.setInt(1, regionId)
+                deleteRegionStmt.executeUpdate()
+            }
+
+            val deletePositionsSql = "DELETE FROM ech_positions WHERE regionId = ?"
+
+            conn.prepareStatement(deletePositionsSql).use { deletePositionsStmt ->
+                deletePositionsStmt.setInt(1, regionId)
+                deletePositionsStmt.executeUpdate()
+            }
+
+            val deleteWhitelistedPlayersSql = "DELETE FROM ech_whitelisted_players WHERE regionId = ?"
+
+            conn.prepareStatement(deleteWhitelistedPlayersSql).use { deleteWhitelistedPlayersStmt ->
+                deleteWhitelistedPlayersStmt.setInt(1, regionId)
+                deleteWhitelistedPlayersStmt.executeUpdate()
+            }
+        }
     }
 
-    override fun addWhitelistedPlayer(whiteListedPlayer: WPlayer): WPlayer? {
-        return null
+    override fun addWhitelistedPlayer(whitelistedPlayerUUID: String, uuid: String, name: String) {
+        this.connection.let { conn ->
+            val insertWhitelistedPlayerSql = "INSERT INTO ech_whitelisted_players (regionId, uuid) VALUES (?, ?)"
+
+            conn.prepareStatement(insertWhitelistedPlayerSql).use { insertWhitelistedPlayerStmt ->
+                insertWhitelistedPlayerStmt.setInt(1, getRegionID(uuid, name))
+                insertWhitelistedPlayerStmt.setString(2, whitelistedPlayerUUID)
+                insertWhitelistedPlayerStmt.executeUpdate()
+            }
+        }
     }
 
-    override fun removeWhitelistedPlayer(whiteListedPlayer: WPlayer) {
+    override fun removeWhitelistedPlayer(whitelistedPlayerUUID: String, uuid: String, name: String) {
+        this.connection.let { conn ->
+            val deleteWhitelistedPlayerSql = "DELETE FROM ech_whitelisted_players WHERE regionId = ? AND uuid = ?"
 
+            conn.prepareStatement(deleteWhitelistedPlayerSql).use { deleteWhitelistedPlayerStmt ->
+                deleteWhitelistedPlayerStmt.setInt(1, getRegionID(uuid, name))
+                deleteWhitelistedPlayerStmt.setString(2, whitelistedPlayerUUID)
+                deleteWhitelistedPlayerStmt.executeUpdate()
+            }
+        }
+    }
+
+    override fun renameRegion(uuid: String, oldName: String, newName: String) {
+        this.connection.let { conn ->
+            val updateRegionSql = "UPDATE ech_regions SET name = ? WHERE id = ?"
+
+            conn.prepareStatement(updateRegionSql).use { updateRegionStmt ->
+                updateRegionStmt.setString(1, newName)
+                updateRegionStmt.setInt(2, getRegionID(uuid, oldName))
+                updateRegionStmt.executeUpdate()
+            }
+        }
+    }
+
+    override fun redefineRegionPositions(uuid: String, name: String, position1: Position, position2: Position) {
+        val regionId = getRegionID(uuid, name)
+
+        this.connection.let { conn ->
+            val updatePositionSql =
+                "UPDATE ech_positions SET world = ?, x = ?, y = ?, z = ? WHERE regionId = ? AND type = ?"
+
+            conn.prepareStatement(updatePositionSql).use { updatePositionStmt ->
+                updatePositionStmt.setString(1, position1.world)
+                updatePositionStmt.setDouble(2, position1.x)
+                updatePositionStmt.setDouble(3, position1.y)
+                updatePositionStmt.setDouble(4, position1.z)
+                updatePositionStmt.setInt(5, regionId)
+                updatePositionStmt.setInt(6, 1)
+                updatePositionStmt.executeUpdate()
+
+                updatePositionStmt.setString(1, position2.world)
+                updatePositionStmt.setDouble(2, position2.x)
+                updatePositionStmt.setDouble(3, position2.y)
+                updatePositionStmt.setDouble(4, position2.z)
+                updatePositionStmt.setInt(5, regionId)
+                updatePositionStmt.setInt(6, 2)
+                updatePositionStmt.executeUpdate()
+            }
+        }
+    }
+
+    private fun getRegionID(uuid: String, name: String): Int {
+        this.connection.let { conn ->
+            val getRegionIDSql = "SELECT id FROM ech_regions WHERE ownerUUID = ? AND name = ?"
+
+            conn.prepareStatement(getRegionIDSql).use { getRegionIDStmt ->
+                getRegionIDStmt.setString(1, uuid)
+                getRegionIDStmt.setString(2, name)
+                val resultSet = getRegionIDStmt.executeQuery()
+
+                if (resultSet.next()) {
+                    return resultSet.getInt("id")
+                }
+            }
+        }
+        return -1
     }
 }

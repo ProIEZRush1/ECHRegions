@@ -3,17 +3,19 @@ package com.proiezrush.echregions.database
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
-import com.proiezrush.echregions.objects.WPlayer
 
 interface DatabaseManager {
 
-    fun loadRegions(sectorSize: Int = 16) : Pair<Map<SpatialKey, MutableList<Region?>>, Map<String, MutableList<Region?>>>
-    fun saveRegions(regions: Map<SpatialKey, MutableList<Region?>>)
+    fun loadRegions(sectorSize: Int = 16) : Pair<MutableMap<SpatialKey, MutableList<Region?>>, Map<String, MutableList<Region?>>>
 
-    fun createRegion(ownerUUID: String, name: String, position1: Position, position2: Position) : Region?
-    fun deleteRegion(regionId: Int)
+    fun createRegion(ownerUUID: String, name: String, position1: Position, position2: Position, sectorSize: Int) : Set<SpatialKey>
+    fun deleteRegion(uuid: String, name: String)
 
-    fun addWhitelistedPlayer(whiteListedPlayer: WPlayer) : WPlayer?
-    fun removeWhitelistedPlayer(whiteListedPlayer: WPlayer)
+    fun addWhitelistedPlayer(whitelistedPlayerUUID: String, uuid: String, name: String)
+    fun removeWhitelistedPlayer(whitelistedPlayerUUID: String, uuid: String, name: String)
+
+    fun renameRegion(uuid: String, oldName: String, newName: String)
+
+    fun redefineRegionPositions(uuid: String, name: String, position1: Position, position2: Position)
 
 }

@@ -1,5 +1,6 @@
 package com.proiezrush.echregions.gui.regions.items
 
+import com.proiezrush.echregions.ECHRegions
 import com.proiezrush.echregions.gui.regions.RegionGUI
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.utils.MessageUtils
@@ -9,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.builder.SkullBuilder
 import xyz.xenondevs.invui.item.impl.SimpleItem
 
-class RegionItem(private val region: Region) : SimpleItem(
+class RegionItem(private val plugin: ECHRegions, private val region: Region) : SimpleItem(
     SkullBuilder(SkullBuilder.HeadTexture(RandomRegionHead.getRandomHead()))
         .setDisplayName(MessageUtils.sParseColors("<blue><b>${region.name}</b></blue>"))
         .addLoreLines("", MessageUtils.sParseColors("<yellow>Whitelisted players: ${region.whitelistedPlayers.size}</yellow>"),
@@ -19,7 +20,7 @@ class RegionItem(private val region: Region) : SimpleItem(
         super.handleClick(clickType, player, event)
 
         // Open region GUI
-        val regionGUI = RegionGUI(region)
+        val regionGUI = RegionGUI(plugin, region)
         regionGUI.open(player)
     }
 }

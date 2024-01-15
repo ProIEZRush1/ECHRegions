@@ -116,6 +116,118 @@ class Config(private val plugin: ECHRegions) {
             ?: "<white>The region <red><b>$regionName</b></red> has been created!</white>"
     }
 
+    /*
+    Region deleted (messages.region-deleted)
+     */
+    fun getRegionDeleted(regionName: String): String {
+        return plugin.config.getString("messages.region-deleted")?.replace("{region}", regionName)
+            ?: "<white>The region <red><b>$regionName</b></red> has been deleted!</white>"
+    }
+
+    /*
+    No whitelisted players (messages.no-whitelisted-players)
+     */
+    fun getNoWhitelistedPlayers(): String {
+        return plugin.config.getString("messages.no-whitelisted-players")
+            ?: "<white>No whitelisted players!</white>"
+    }
+
+    /*
+    Whitelisted players list title (messages.whitelisted-players-list-title)
+     */
+    fun getWhitelistedPlayersListTitle(count: Int): String {
+        return plugin.config.getString("messages.whitelisted-players-list-title")?.replace("{count}", count.toString())
+            ?: "<gray>Users:</gray> <yellow><b>{count}</b></yellow>"
+    }
+
+    /*
+    Whitelisted players list player (messages.whitelisted-players-list-player)
+     */
+    fun getWhitelistedPlayersListPlayer(player: String): String {
+        return plugin.config.getString("messages.whitelisted-players-list-player")?.replace("{player}", player)
+            ?: "<gray>-</gray> <yellow><b>{player}</b></yellow>"
+    }
+
+    /*
+    Player not found (messages.player-not-found)
+     */
+    fun getPlayerNotFound(player: String): String {
+        return plugin.config.getString("messages.player-not-found")?.replace("{player}", player)
+            ?: "<white>The player <red><b>$player</b></red> does not exist!</white>"
+    }
+
+    /*
+    Player already whitelisted (messages.player-already-whitelisted)
+     */
+    fun getPlayerAlreadyWhitelisted(player: String): String {
+        return plugin.config.getString("messages.player-already-whitelisted")?.replace("{player}", player)
+            ?: "<white>The player <red><b>$player</b></red> is already whitelisted!</white>"
+    }
+
+    /*
+    Player whitelisted (messages.player-whitelisted)
+     */
+    fun getPlayerWhitelisted(player: String): String {
+        return plugin.config.getString("messages.player-whitelisted")?.replace("{player}", player)
+            ?: "<white>The player <red><b>$player</b></red> has been whitelisted!</white>"
+    }
+
+    /*
+    Player not whitelisted (messages.player-not-whitelisted)
+     */
+    fun getPlayerNotWhitelisted(player: String): String {
+        return plugin.config.getString("messages.player-not-whitelisted")?.replace("{player}", player)
+            ?: "<white>The player <red><b>$player</b></red> is not whitelisted!</white>"
+    }
+
+    /*
+    Player removed from whitelist (messages.player-removed-from-whitelist)
+     */
+    fun getPlayerRemovedFromWhitelist(player: String): String {
+        return plugin.config.getString("messages.player-removed-from-whitelist")?.replace("{player}", player)
+            ?: "<white>The player <red><b>$player</b></red> has been removed from the whitelist!</white>"
+    }
+
+    /*
+    Renaming region (messages.renaming-region)
+     */
+    fun getRenamingRegion(player: String): String {
+        return plugin.config.getString("messages.renaming-region")?.replace("{player}", player)
+            ?: "<white>Renaming region...</white>"
+    }
+
+    /*
+    Region renamed (messages.region-renamed)
+     */
+    fun getRegionRenamed(oldRegionName: String, regionName: String): String {
+        return plugin.config.getString("messages.region-renamed")?.replace("{oldName}", oldRegionName)?.replace("{newName}", regionName)
+            ?: "<green>The region <gray><b>${regionName}</b></gray> has been renamed to <gray><b>{newName}</b></gray>!</green>"
+    }
+
+    /*
+    Redefining region (messages.redefining-region)
+     */
+    fun getRedefiningRegion(player: String): String {
+        return plugin.config.getString("messages.redefining-region")?.replace("{player}", player)
+            ?: "<white>Redefining region...</white>"
+    }
+
+    /*
+    Region redefined (messages.region-redefined)
+     */
+    fun getRegionRedefined(regionName: String): String {
+        return plugin.config.getString("messages.region-redefined")?.replace("{region}", regionName)
+            ?: "<green>The region <gray><b>{region}</b></gray> positions have been redefined!</green>"
+    }
+
+    /*
+    Region not allowed
+     */
+    fun getRegionNotAllowed(): String {
+        return plugin.config.getString("messages.region-not-allowed")
+            ?: "<red>You are not allowed to do this!</red>"
+    }
+
     fun getConfig(): FileConfiguration {
         return plugin.config
     }

@@ -3,8 +3,6 @@ package com.proiezrush.echregions.database.local
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
-import com.proiezrush.echregions.utils.MessageUtils
-import org.bukkit.entity.Player
 
 class LocalDatabaseManager {
 
@@ -14,15 +12,24 @@ class LocalDatabaseManager {
         regionsByUUID[uuid]?.add(region)
     }
 
-    fun removeRegion(uuid: String, region: Region) {
-        regionsByUUID[uuid]?.remove(region)
+    fun renameRegion(uuid: String, oldName: String, newName: String) {
+        regionsByUUID[uuid]?.firstOrNull { it?.name == oldName }?.name = newName
+    }
+
+    fun redefineRegionPositions(uuid: String, name: String, position1: Position, position2: Position) {
+        regionsByUUID[uuid]?.firstOrNull { it?.name == name }?.position1 = position1
+        regionsByUUID[uuid]?.firstOrNull { it?.name == name }?.position2 = position2
+    }
+
+    fun deleteRegion(uuid: String, name: String) {
+        regionsByUUID[uuid]?.removeIf { it?.name == name }
     }
 
     fun searchRegionByName(uuid: String, name: String): Region? {
         return regionsByUUID[uuid]?.firstOrNull { it?.name == name }
     }
 
-    var spatialRegions = emptyMap<SpatialKey, MutableList<Region?>>()
+    var spatialRegions = mutableMapOf<SpatialKey, MutableList<Region?>>()
 
     fun getPlayerRegions(uuid: String): List<Region?> {
         return regionsByUUID[uuid] ?: emptyList()
@@ -44,5 +51,41 @@ class LocalDatabaseManager {
 
     fun getPlayerSecondPosition(uuid: String): Position? {
         return playerSelectedPositions[uuid]?.firstOrNull { it.type == 2 }
+    }
+
+    fun addWhitelistedPlayer(playerUUID: String, uuid: String, name: String) {
+        regionsByUUID[uuid]?.firstOrNull { it?.name == name }?.whitelistedPlayers?.add(playerUUID)
+    }
+
+    fun removeWhitelistedPlayer(playerUUID: String, uuid: String, name: String) {
+        regionsByUUID[uuid]?.firstOrNull { it?.name == name }?.whitelistedPlayers?.remove(playerUUID)
+    }
+
+    private var playersRenamingRegion = mutableMapOf<String, String>()
+
+    fun addPlayerRenamingRegion(playerUUID: String, name: String) {
+        playersRenamingRegion[playerUUID] = name
+    }
+
+    fun getPlayerRenamingRegion(playerUUID: String): String? {
+        return playersRenamingRegion[playerUUID]
+    }
+
+    fun removePlayerRenamingRegion(playerUUID: String) {
+        playersRenamingRegion.remove(playerUUID)
+    }
+
+    private var playersRedefiningRegion = mutableMapOf<String, String>()
+
+    fun addPlayerRedefiningRegion(playerUUID: String, name: String) {
+        playersRedefiningRegion[playerUUID] = name
+    }
+
+    fun getPlayerRedefiningRegion(playerUUID: String): String? {
+        return playersRedefiningRegion[playerUUID]
+    }
+
+    fun removePlayerRedefiningRegion(playerUUID: String) {
+        playersRedefiningRegion.remove(playerUUID)
     }
 }

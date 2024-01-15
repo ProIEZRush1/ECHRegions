@@ -4,6 +4,8 @@ import com.proiezrush.echregions.commands.RegionCommand
 import com.proiezrush.echregions.config.Config
 import com.proiezrush.echregions.database.DatabaseImpl
 import com.proiezrush.echregions.database.DatabaseType
+import com.proiezrush.echregions.listeners.RegionInteractionListener
+import com.proiezrush.echregions.listeners.RenameRegionListener
 import com.proiezrush.echregions.listeners.WandListener
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
@@ -79,36 +81,11 @@ class ECHRegions : JavaPlugin() {
 
         // Register listener
         server.pluginManager.registerEvents(WandListener(this), this)
+        server.pluginManager.registerEvents(RenameRegionListener(this), this)
+        server.pluginManager.registerEvents(RegionInteractionListener(this), this)
 
         val pluginEnabledMessage = config.getPrefix() + "<green>Plugin enabled!</green>"
         MessageUtils.sendConsoleMessage(pluginEnabledMessage)
-    }
-
-    fun findPlayerRegion(regionsBySpatialKey: Map<SpatialKey, MutableList<Region?>>, sectorSize: Int, playerPosition: Position): Region? {
-        val playerKey = SpatialKey(
-            (playerPosition.x / sectorSize).toInt(),
-            (playerPosition.y / sectorSize).toInt(),
-            (playerPosition.z / sectorSize).toInt()
-        )
-
-        regionsBySpatialKey[playerKey]?.forEach { region ->
-            if (isPositionInsideRegion(playerPosition, region!!)) {
-                return region
-            }
-        }
-
-        return null
-    }
-
-    fun isPositionInsideRegion(position: Position, region: Region): Boolean {
-        // Check world names, p1 and p2 will always be in the same world
-        if (position.world != region.position1.world) {
-            return false
-        }
-
-        return position.x in minOf(region.position1.x, region.position2.x)..maxOf(region.position1.x, region.position2.x) &&
-                position.y in minOf(region.position1.y, region.position2.y)..maxOf(region.position1.y, region.position2.y) &&
-                position.z in minOf(region.position1.z, region.position2.z)..maxOf(region.position1.z, region.position2.z)
     }
 
     override fun onDisable() {
