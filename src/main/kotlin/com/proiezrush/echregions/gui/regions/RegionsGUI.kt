@@ -21,7 +21,6 @@ class RegionsGUI(private val plugin: ECHRegions, uuid: String) {
     init {
         val localDatabaseManager = plugin.getDatabaseImpl().getLocalDatabaseManager()
         regionList = localDatabaseManager.getPlayerRegions(uuid)
-        MessageUtils.sendConsoleMessage(regionList.toString())
 
         val items = regionList.map { region ->
             RegionItem(plugin, region!!)

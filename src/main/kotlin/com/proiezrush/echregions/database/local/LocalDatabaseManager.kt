@@ -3,6 +3,7 @@ package com.proiezrush.echregions.database.local
 import com.proiezrush.echregions.objects.Position
 import com.proiezrush.echregions.objects.Region
 import com.proiezrush.echregions.objects.SpatialKey
+import org.bukkit.conversations.Conversation
 
 class LocalDatabaseManager {
 
@@ -71,17 +72,21 @@ class LocalDatabaseManager {
         regionsByUUID[uuid]?.firstOrNull { it?.name == name }?.whitelistedPlayers?.remove(playerUUID)
     }
 
-    private var playersRenamingRegion = mutableMapOf<String, String>()
+    private var playersRenamingRegion = mutableMapOf<String, Conversation>()
 
-    fun addPlayerRenamingRegion(playerUUID: String, name: String) {
-        playersRenamingRegion[playerUUID] = name
+    fun addPlayerRenamingRegionConversation(playerUUID: String, conversation: Conversation) {
+        playersRenamingRegion[playerUUID] = conversation
     }
 
-    fun getPlayerRenamingRegion(playerUUID: String): String? {
+    fun getPlayerRenamingRegionConversation(playerUUID: String): Conversation? {
         return playersRenamingRegion[playerUUID]
     }
 
-    fun removePlayerRenamingRegion(playerUUID: String) {
+    fun getAllPlayerRenamingRegionConversations(): Map<String, Conversation> {
+        return playersRenamingRegion
+    }
+
+    fun removePlayerRenamingRegionConversation(playerUUID: String) {
         playersRenamingRegion.remove(playerUUID)
     }
 

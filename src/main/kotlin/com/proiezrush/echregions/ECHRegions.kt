@@ -2,14 +2,11 @@ package com.proiezrush.echregions
 
 import com.proiezrush.echregions.commands.RegionCommand
 import com.proiezrush.echregions.config.Config
+import com.proiezrush.echregions.conversations.ConversationManager
 import com.proiezrush.echregions.database.DatabaseImpl
 import com.proiezrush.echregions.database.DatabaseType
 import com.proiezrush.echregions.listeners.RegionInteractionListener
-import com.proiezrush.echregions.listeners.RenameRegionListener
 import com.proiezrush.echregions.listeners.WandListener
-import com.proiezrush.echregions.objects.Position
-import com.proiezrush.echregions.objects.Region
-import com.proiezrush.echregions.objects.SpatialKey
 import com.proiezrush.echregions.utils.MessageUtils
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
@@ -18,6 +15,8 @@ class ECHRegions : JavaPlugin() {
 
     private val config = Config(this)
     private lateinit var databaseImpl: DatabaseImpl;
+
+    private lateinit var conversationManager: ConversationManager;
 
     override fun onEnable() {
         super.onEnable()
@@ -81,8 +80,10 @@ class ECHRegions : JavaPlugin() {
 
         // Register listener
         server.pluginManager.registerEvents(WandListener(this), this)
-        server.pluginManager.registerEvents(RenameRegionListener(this), this)
         server.pluginManager.registerEvents(RegionInteractionListener(this), this)
+
+        // Register conversations
+        conversationManager = ConversationManager(this)
 
         val pluginEnabledMessage = config.getPrefix() + "<green>Plugin enabled!</green>"
         MessageUtils.sendConsoleMessage(pluginEnabledMessage)
@@ -96,6 +97,12 @@ class ECHRegions : JavaPlugin() {
 
         databaseImpl.getDatabase().close()
 
+        // End all ongoing conversations
+        val conversations = databaseImpl.getLocalDatabaseManager().getAllPlayerRenamingRegionConversations()
+        for (conversation in conversations.values) {
+            conversation.abandon()
+        }
+
         val pluginDisabledMessage = config.getPrefix() + "<red>Plugin disabled!</red>"
         MessageUtils.sendConsoleMessage(pluginDisabledMessage)
     }
@@ -106,6 +113,10 @@ class ECHRegions : JavaPlugin() {
 
     fun getDatabaseImpl(): DatabaseImpl {
         return databaseImpl
+    }
+
+    fun getConversationManager(): ConversationManager {
+        return conversationManager
     }
 
 }
